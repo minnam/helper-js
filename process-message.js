@@ -1,33 +1,28 @@
 // process-message.js
+const Dialogflow = require('dialogflow');
 import {
     DIALOGFLOW_PRIVATE_KEY,
-    DIALOGFLOW_CLIENT_EMAIL
-} from './variables'
+    DIALOGFLOW_CLIENT_EMAIL,
+    DIALOGFLOW_PROJECT_ID,
+    DIALOGFLOW_SESSION_ID,
+    DIALOGFLOW_LANGUAGE_CODE
+} from './config'
 
-const Dialogflow = require('dialogflow');
-
-// You can find your project ID in your Dialogflow agent settings
-const projectId = 'brendan-40379'
-const sessionId = '123456';
-const languageCode = 'en-US';
-
-const config = {
+const sessionClient = new Dialogflow.SessionsClient({
   credentials: {
     private_key: DIALOGFLOW_PRIVATE_KEY,
     client_email: DIALOGFLOW_CLIENT_EMAIL,
   },
-};
-
-const sessionClient = new Dialogflow.SessionsClient(config);
-const sessionPath = sessionClient.sessionPath(projectId, sessionId);
+});
+const sessionPath = sessionClient.sessionPath(DIALOGFLOW_PROJECT_ID, DIALOGFLOW_SESSION_ID);
 
 const processMessage = async message => {
   const request = {
     session: sessionPath,
     queryInput: {
       text: {
+        languageCode: DIALOGFLOW_LANGUAGE_CODE,
         text: message,
-        languageCode,
       },
     },
   };
