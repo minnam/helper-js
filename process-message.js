@@ -29,11 +29,14 @@ const processMessage = async message => {
 
   const response = await sessionClient.detectIntent(request)
   const result = response[0].queryResult;
+
+  console.log(result)
   
   return {
     phrase: message,
     response: result.fulfillmentText,
-    isFallback: result.intent.isFallback
+    isFallback: result.intent.isFallback,
+    isNavigation: result.intent.displayName === 'navigation'
   }
 }
 
