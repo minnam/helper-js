@@ -2,7 +2,6 @@
 require('dotenv').config()
 const Dialogflow = require('dialogflow');
 
-console.log(process.env)
 const sessionClient = new Dialogflow.SessionsClient({
   credentials: {
     private_key: process.env.DIALOGFLOW_PRIVATE_KEY,
@@ -24,8 +23,6 @@ const processMessage = async message => {
 
   const response = await sessionClient.detectIntent(request)
   const result = response[0].queryResult;
-
-  console.log(result)
   
   return {
     phrase: message,

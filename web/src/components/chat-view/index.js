@@ -91,6 +91,18 @@ export default class ChatView extends React.Component {
   }
 
   fetchNavigation = () => {
+    const { conversation } = this.state
+
+    const loading = {
+      component: <i className={classes('material-icons', ANIMATIONS.rotate)}>hourglass_empty</i>,
+      user: 'bot',
+    }
+
+    this.setState({
+      conversation: [...conversation, loading],
+    })
+
+
     fetch(`${URL}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -99,6 +111,8 @@ export default class ChatView extends React.Component {
       }),
     }).then(res => {
       const { conversation } = this.state
+      conversation.pop()
+
       res.json().then(body => {
         const message = {
           component: <Navigation
@@ -223,18 +237,32 @@ export default class ChatView extends React.Component {
   };
 
   handleIssueReport = title => {
+    const { conversation } = this.state
+
+    const loading = {
+      component: <i className={classes('material-icons', ANIMATIONS.rotate)}>hourglass_empty</i>,
+      user: 'bot',
+    }
+
+    this.setState({
+      conversation: [...conversation, loading],
+    })
+
     fetch(`${URL}/report`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title })
     }).then(res => {
       res.json().then(body => {
+        const { conversation } = this.state
+        conversation.pop()
+
         const message = {
-          text: `${body.response}${body.url ? ` at <a href=${body.url}>${body.url}</a>` : ''}`,
+          component: <span>{body.response} at <button><a href={body.url} target='_'>{body.url}</a></button></span>,
           user: 'bot',
         }
         this.setState({
-          conversation: [...this.state.conversation, message],
+          conversation: [...conversation, message],
         })
 
         this.conversationView.scrollTop=this.conversationView.scrollHeight

@@ -125,7 +125,7 @@ module.exports = [
 
         objects.push(_object)
       }
-      agent.add(`Here it is  \n, <code>const TEST_DATA = ${JSON.stringify(objects)}</code>`)
+      agent.add(`Here it is!  \n <code>const TEST_DATA = ${JSON.stringify(objects)}</code>`)
     }
   }
 ]

@@ -27,10 +27,10 @@ app.post('/report', async (req, res) => {
       'Authorization': `token ${process.env.GITHUB_TOKEN}`
     }
   }).then(({ data, status }) => {
-    if (status === 201) {
+    if (status === 201) {      
       res.status(200).json({
         response: `Issue was created`,
-        url: data.url
+        url: data.html_url
       })
     } else {
       res.status(status).json({
