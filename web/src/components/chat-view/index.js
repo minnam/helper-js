@@ -1,4 +1,5 @@
 import React from 'react'
+import { classes } from 'typestyle'
 import ANIMATIONS from '../../common/animations'
 import {
   ChatBubble,
@@ -129,8 +130,13 @@ export default class ChatView extends React.Component {
       user: 'you',
     }
 
+    const loading = {
+      component: <i className={classes('material-icons', ANIMATIONS.rotate)}>hourglass_empty</i>,
+      user: 'bot',
+    }
+
     this.setState({
-      conversation: [...conversation, message],
+      conversation: [...conversation, message, loading],
     })
 
     this.conversationView.scrollTop = this.conversationView.scrollHeight
@@ -143,6 +149,9 @@ export default class ChatView extends React.Component {
       }),
     }).then(res => {
       const { conversation } = this.state
+
+      // Remove loading message
+      conversation.pop()
 
       res.json().then(body => {
         let message
