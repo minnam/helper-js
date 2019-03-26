@@ -1,27 +1,21 @@
 // process-message.js
+require('dotenv').config()
 const Dialogflow = require('dialogflow');
-import {
-    DIALOGFLOW_PRIVATE_KEY,
-    DIALOGFLOW_CLIENT_EMAIL,
-    DIALOGFLOW_PROJECT_ID,
-    DIALOGFLOW_SESSION_ID,
-    DIALOGFLOW_LANGUAGE_CODE
-} from './config'
 
 const sessionClient = new Dialogflow.SessionsClient({
   credentials: {
-    private_key: DIALOGFLOW_PRIVATE_KEY,
-    client_email: DIALOGFLOW_CLIENT_EMAIL,
+    private_key: process.env.DIALOGFLOW_PRIVATE_KEY,
+    client_email: process.env.DIALOGFLOW_CLIENT_EMAIL,
   },
 });
-const sessionPath = sessionClient.sessionPath(DIALOGFLOW_PROJECT_ID, DIALOGFLOW_SESSION_ID);
+const sessionPath = sessionClient.sessionPath(process.env.DIALOGFLOW_PROJECT_ID, process.env.DIALOGFLOW_SESSION_ID);
 
 const processMessage = async message => {
   const request = {
     session: sessionPath,
     queryInput: {
       text: {
-        languageCode: DIALOGFLOW_LANGUAGE_CODE,
+        languageCode: process.env.DIALOGFLOW_LANGUAGE_CODE,
         text: message,
       },
     },

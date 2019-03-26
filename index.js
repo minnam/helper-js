@@ -1,15 +1,11 @@
 // server.js
+require('dotenv').config()
+
 import axios from 'axios'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-
-import { 
-  GITHUB_ISSUE_URL,
-  GITHUB_TOKEN 
-} from './config'
-import processMessage from './process-message'
-
+import dialogFlowHelper from './dialog-flow-helper'
 const app = express()
 
 app.use(cors())
@@ -18,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.post('/chat', async (req, res) => {
   const { message } = req.body
-  const processedMessage = await processMessage(message)
+  const processedMessage = await dialogFlowHelper(message)
 
   res.status(200).json(processedMessage)
 });
@@ -26,9 +22,9 @@ app.post('/chat', async (req, res) => {
 app.post('/report', async (req, res) => {
   const { title } = req.body
 
-  axios.post(`${GITHUB_ISSUE_URL}`, { title }, {
+  axios.post(`${process.env.GITHUB_ISSUE_URL}`, { title }, {
     headers: {
-      'Authorization': `token ${GITHUB_TOKEN}`
+      'Authorization': `token ${process.env.GITHUB_TOKEN}`
     }
   }).then(({ data, status }) => {
     if (status === 201) {

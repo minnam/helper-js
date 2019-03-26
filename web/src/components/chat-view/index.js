@@ -1,48 +1,11 @@
 import React from 'react'
-import { classes } from 'typestyle'
 import ANIMATIONS from '../../common/animations'
-import './index.css'
-
-const Navigation = props => <ul className='chat-navigation'>{props.children}</ul>
-class NavigationItem extends React.Component {
-  state = {
-    toggled: false
-  }
-
-  render () {
-    const { title, children, setChatText } = this.props
-    const { toggled } = this.state
-    return <li>
-      <span 
-        className='chat-navigation-category-title'
-        onClick={() => {
-          this.setState({
-            toggled: !toggled
-          })
-        }}
-      >
-        <i className='material-icons'>{ toggled ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }</i>
-        {title}
-      </span>
-      <ul
-        style={{
-          display: toggled ? '' : 'none' 
-        }}
-      >
-        {
-          children.map((item, key) => {
-            return <li 
-              key={key}
-              onClick={() => {setChatText(item.example)}}
-            >
-              {item.description}
-            </li>
-          })
-        }
-      </ul>
-    </li>
-  }
-}
+import {
+  ChatBubble,
+  Code,
+  Navigation
+} from '../__modules__'
+import { URL } from '../../config'
 
 export default class ChatView extends React.Component {
   state = {
@@ -54,179 +17,46 @@ export default class ChatView extends React.Component {
       },
       {
         user: 'bot',
-        text: 'Welcome to js-helpbot'
+        component: <span>
+          Welcome to helpbot.js! Click <button onClick={() => {this.fetchNavigation()}}>here</button> for directory.
+        </span>
       }
     ]
   }
 
-  renderNavigation = data => {
-    const components = []
-    for (const objKey in data) {
-      components.push(
-        <NavigationItem
-          title={objKey}
-          children={data[objKey]}
-          key={objKey}
-          setChatText={text => {                        
-            this.setState({ userMessage: text, focusChat: true })
-            this.input.focus()
-          }}
-        />
-      )
-    }
-
-    return <Navigation>{components}</Navigation>
-  }
-
-  handleChange = e => {
-    this.setState({ userMessage: e.target.value })
-  };
-
-  handleSubmit = e => {
-    e.preventDefault()
-    if (!this.state.userMessage.trim()) return
-
-    const msg = {
-      text: this.state.userMessage,
-      user: 'you',
-    }
-
-    this.setState({
-      conversation: [...this.state.conversation, msg],
-    })
-
-    this.conversationView.scrollTop=this.conversationView.scrollHeight
-
-    fetch('http://localhost:5000/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: this.state.userMessage,
-      }),
-    }).then(res => {
-      res.json().then(body => {
-        let msg
-
-        if (body.isNavigation) {
-          msg = {
-            component: this.renderNavigation(JSON.parse(body.response)),
-            user: 'bot',
-          }
-          this.setState({
-            conversation: [...this.state.conversation, msg],
-          })
-        } else if (body.response && !body.isFallback) {
-          msg = {
-            text: `${body.response}`,
-            user: 'bot',
-          }
-          this.setState({
-            conversation: [...this.state.conversation, msg],
-          })
-        } else {
-          msg = {
-            text: `There is no response for <i>${body.phrase}</i>`,
-            user: 'bot',
-          }
-          this.setState({
-            conversation: [...this.state.conversation, msg],
-          })
-
-          msg = {
-            component: <span>
-              Would you like to <button onClick={() => {this.handleIssueReport(body.phrase)}}>create an issue?</button>
-            </span>,
-            user: 'bot',
-          }
-          this.setState({
-            conversation: [...this.state.conversation, msg],
-          })
-        }
-        this.conversationView.scrollTop=this.conversationView.scrollHeight
-      })
-    })
-
-    this.setState({ userMessage: '', focusChat: false })
-  };
-
-  handleIssueReport = title => {
-    fetch('http://localhost:5000/report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title })
-    }).then(res => {
-      res.json().then(body => {
-        const msg = {
-          text: `${body.response}${body.url ? ` at <a href=${body.url}>${body.url}</a>` : ''}`,
-          user: 'bot',
-        }
-        this.setState({
-          conversation: [...this.state.conversation, msg],
-        })
-
-        this.conversationView.scrollTop=this.conversationView.scrollHeight
-      })
-    })
-  }
-
   render () {
-    const { focusChat } = this.state 
+    const {
+      conversation,
+      chatInputFocused
+    } = this.state
 
-    const ChatBubble = param => {
-      const {
-        text,
-        i,
-        user,
-        className,
-        component,
-      } = param
-      return (
-        <div
-          key={`${user}-${i}`}
-          className={`${user} chat-bubble`}
-        >
-          <div className='avatar'>
-            {user}
-          </div>
-          <div className={classes(className, 'chat-content-wrapper')}>
-            {
-              (() => {
-                if (component) {
-                  return <span className="chat-content">
-                    {component}
-                  </span>
-                } else {
-                  return <span className="chat-content" dangerouslySetInnerHTML={{__html: text}} />
-                }
-              })()
-            }
-
-          </div>
-        </div>
-      )
-    }
-
-    const chat = this.state.conversation.map((e, index) =>
+    const chat = conversation.map((item, index) =>
       ChatBubble({
-        text: e.text,
-        i: index,
-        user: e.user,
-        className: e.user === 'bot' ? ANIMATIONS.fadeInLeft : ANIMATIONS.fadeInRight,
-        component: e.component
+        className: item.user === 'bot' ? ANIMATIONS.fadeInLeft : ANIMATIONS.fadeInRight,
+        component: item.component,
+        index,
+        text: item.text,
+        user: item.user,
       })
     )
 
     return <div className="chat-window">
-      <nav className={ANIMATIONS.fadeInRight}>
-        <h1><a href="https://github.com/minnam/js-helpbot">js-helpbot</a></h1>
+      <nav
+        className={ANIMATIONS.fadeInRight}
+        style={{
+          zIndex: chatInputFocused ? 5000 : 1,
+          color: chatInputFocused ? 'white' : '',
+        }}
+      >
+        <h1>helpbot.js</h1>
       </nav>
       <div
-        className='chat-focus-dialog' 
+        className='chat-focus-dialog'
         onClick={() => {
-          this.setState({ focusChat: false })
+          this.setState({ chatInputFocused: false })
         }}
         style={{
-          display: focusChat ? '' : 'none'          
+          display: chatInputFocused ? '' : 'none'
         }}
       >
         <span className={ANIMATIONS.fadeInUp}>
@@ -253,5 +83,153 @@ export default class ChatView extends React.Component {
         </form>
       </div>
     </div>
+  }
+
+  handleChange = e => {
+    this.setState({ userMessage: e.target.value })
+  }
+
+  fetchNavigation = () => {
+    fetch(`${URL}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: 'What can I ask?',
+      }),
+    }).then(res => {
+      const { conversation } = this.state
+      res.json().then(body => {
+        const message = {
+          component: <Navigation
+            data={JSON.parse(body.response)}
+            setChatText={text => {
+              this.setState({ userMessage: text, chatInputFocused: true })
+              this.input.focus()
+            }}
+          />,
+          user: 'bot',
+        }
+
+        this.setState({ conversation: [...conversation, message] })
+      })
+    })
+  }
+
+  handleSubmit = e => {
+    const {
+      conversation,
+      userMessage
+    } = this.state
+
+    e.preventDefault()
+    if (!userMessage.trim()) return
+
+    const message = {
+      text: userMessage,
+      user: 'you',
+    }
+
+    this.setState({
+      conversation: [...conversation, message],
+    })
+
+    this.conversationView.scrollTop = this.conversationView.scrollHeight
+
+    fetch(`${URL}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: userMessage,
+      }),
+    }).then(res => {
+      const { conversation } = this.state
+
+      res.json().then(body => {
+        let message
+
+        /** Render Navigation */
+        if (body.isNavigation) {
+          message = {
+            component: <Navigation
+              data={JSON.parse(body.response)}
+              setChatText={text => {
+                this.setState({ userMessage: text, chatInputFocused: true })
+                this.input.focus()
+              }}
+            />,
+            user: 'bot',
+          }
+
+          this.setState({ conversation: [...conversation, message] })
+
+        /** Default */
+        } else if (body.response && !body.isFallback) {
+
+          if (body.response.includes('<code>')) {
+            const original = body.response.split(/<code>(.*)<\/code>/s)
+
+            message = {
+              component: <span>
+                <span>{original[0]}</span>
+                <Code>{original[1]}</Code>
+              </span>,
+              user: 'bot',
+            }
+
+          } else {
+            message = {
+              text: `${body.response}`,
+              user: 'bot',
+            }
+          }
+
+          this.setState({ conversation: [...conversation, message] })
+
+        /** Fallback Intent */
+        } else {
+          message = {
+            text: `There is no response for <i>${body.phrase}</i>`,
+            user: 'bot',
+          }
+          this.setState({
+            conversation: [...conversation, message],
+          })
+
+          message = {
+            component: <span>
+              Would you like to <button onClick={() => {this.handleIssueReport(body.phrase)}}>create an issue?</button>
+            </span>,
+            user: 'bot',
+          }
+          this.setState({
+            conversation: [...conversation, message],
+          })
+        }
+
+        this.conversationView.scrollTop = this.conversationView.scrollHeight
+      })
+    })
+
+    this.setState({ userMessage: '', chatInputFocused: false })
+  };
+
+  handleIssueReport = title => {
+    fetch(`${URL}/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title })
+    }).then(res => {
+      res.json().then(body => {
+        const message = {
+          text: `${body.response}${body.url ? ` at <a href=${body.url}>${body.url}</a>` : ''}`,
+          user: 'bot',
+        }
+        this.setState({
+          conversation: [...this.state.conversation, message],
+        })
+
+        this.conversationView.scrollTop=this.conversationView.scrollHeight
+      })
+    })
   }
 }

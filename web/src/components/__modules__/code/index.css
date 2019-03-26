@@ -1,0 +1,20 @@
+code {
+  background: rgb(23, 58, 72);
+  width: 100%;
+  position: relative;
+  display: inline-block;
+  color: white;
+  font-size: 14px;
+  padding: 20px;
+}
+
+code button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+code textarea {  
+  height: 0px;
+  opacity: 0;
+}

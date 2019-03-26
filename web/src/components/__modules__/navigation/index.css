@@ -1,5 +1,7 @@
 .chat-navigation {
   list-style: none;
+  font-size: 18px;
+  font-family: Roboto Mono;
 }
 
 .chat-navigation ul {
