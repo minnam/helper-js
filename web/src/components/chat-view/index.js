@@ -192,7 +192,7 @@ export default class ChatView extends React.Component {
             user: 'bot',
           }
           this.setState({
-            conversation: [...conversation, message],
+            conversation: [...this.state.conversation, message],
           })
 
           message = {
@@ -202,7 +202,7 @@ export default class ChatView extends React.Component {
             user: 'bot',
           }
           this.setState({
-            conversation: [...conversation, message],
+            conversation: [...this.state.conversation, message],
           })
         }
 

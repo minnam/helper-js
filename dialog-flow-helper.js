@@ -2,6 +2,7 @@
 require('dotenv').config()
 const Dialogflow = require('dialogflow');
 
+console.log(process.env)
 const sessionClient = new Dialogflow.SessionsClient({
   credentials: {
     private_key: process.env.DIALOGFLOW_PRIVATE_KEY,
