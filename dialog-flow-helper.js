@@ -1,4 +1,3 @@
-// process-message.js
 require('dotenv').config()
 const Dialogflow = require('dialogflow');
 
